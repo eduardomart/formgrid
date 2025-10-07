@@ -78,6 +78,7 @@ export function FormDetailsPage() {
     const [notificationEmails, setNotificationEmails] = useState<string[]>([]);
     const [newEmail, setNewEmail] = useState('');
     const [redirectUrl, setRedirectUrl] = useState('');
+    const [copiedStates, setCopiedStates] = useState<{ [key: string]: boolean }>({});
     // Spam protection state management
     // This tracks the security settings that will be saved to the backend
     // enabled: Master toggle for all spam protection (CAPTCHA, honeypot, rate limiting)
@@ -361,9 +362,16 @@ export function FormDetailsPage() {
         }
     };
 
-    const handleCopy = (text: string) => {
+    const handleCopy = (text: string, buttonKey: string) => {
         navigator.clipboard.writeText(text);
-        // You could add a toast notification here
+
+        // Show "Copied!" feedback
+        setCopiedStates(prev => ({ ...prev, [buttonKey]: true }));
+
+        // Reset after 2 seconds
+        setTimeout(() => {
+            setCopiedStates(prev => ({ ...prev, [buttonKey]: false }));
+        }, 2000);
     };
 
 
@@ -454,10 +462,10 @@ export function FormDetailsPage() {
                                 className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 text-gray-500"
                             />
                             <button
-                                onClick={() => handleCopy(generateEndpointUrl(form.endpointSlug))}
-                                className="ml-2 px-3 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800"
+                                onClick={() => handleCopy(generateEndpointUrl(form.endpointSlug), 'endpoint-url')}
+                                className="ml-2 px-3 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors duration-200"
                             >
-                                Copy
+                                {copiedStates['endpoint-url'] ? 'Copied!' : 'Copy'}
                             </button>
                         </div>
                     </div>
@@ -471,10 +479,10 @@ export function FormDetailsPage() {
                                 className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 text-gray-500"
                             />
                             <button
-                                onClick={() => handleCopy(form.id)}
-                                className="ml-2 px-3 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800"
+                                onClick={() => handleCopy(form.id, 'form-id')}
+                                className="ml-2 px-3 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors duration-200"
                             >
-                                Copy
+                                {copiedStates['form-id'] ? 'Copied!' : 'Copy'}
                             </button>
                         </div>
                     </div>
@@ -551,10 +559,10 @@ export function FormDetailsPage() {
     <input type="email" name="email" placeholder="Your Email" required>
     <textarea name="message" placeholder="Your Message" required></textarea>
     <button type="submit">Send Message</button>
-</form>`)}
-                        className="mt-4 px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800"
+</form>`, 'html-code')}
+                        className="mt-4 px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors duration-200"
                     >
-                        Copy HTML Code
+                        {copiedStates['html-code'] ? 'Copied!' : 'Copy HTML Code'}
                     </button>
                 </div>
 
@@ -611,10 +619,10 @@ form.addEventListener('submit', async (e) => {
     } catch (error) {
         alert('Error submitting form');
     }
-});`)}
-                        className="mt-4 px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800"
+});`, 'javascript-code')}
+                        className="mt-4 px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors duration-200"
                     >
-                        Copy JavaScript Code
+                        {copiedStates['javascript-code'] ? 'Copied!' : 'Copy JavaScript Code'}
                     </button>
                 </div>
             </div>
@@ -958,10 +966,10 @@ form.addEventListener('submit', async (e) => {
                                 className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 text-gray-500"
                             />
                             <button
-                                onClick={() => handleCopy(generateEndpointUrl(form.endpointSlug))}
-                                className="ml-2 px-3 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800"
+                                onClick={() => handleCopy(generateEndpointUrl(form.endpointSlug), 'endpoint-url')}
+                                className="ml-2 px-3 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors duration-200"
                             >
-                                Copy
+                                {copiedStates['endpoint-url'] ? 'Copied!' : 'Copy'}
                             </button>
                         </div>
                     </div>
@@ -975,10 +983,10 @@ form.addEventListener('submit', async (e) => {
                                 className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 text-gray-500"
                             />
                             <button
-                                onClick={() => handleCopy(form.id)}
-                                className="ml-2 px-3 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800"
+                                onClick={() => handleCopy(form.id, 'form-id')}
+                                className="ml-2 px-3 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors duration-200"
                             >
-                                Copy
+                                {copiedStates['form-id'] ? 'Copied!' : 'Copy'}
                             </button>
                         </div>
                     </div>
