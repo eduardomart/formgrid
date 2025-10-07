@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { useForms } from '../hooks/useForms';
 import { useAuth } from '../context/AuthContext';
@@ -59,6 +59,7 @@ const formatCreatedDate = (createdAt: string) => {
 export function FormDetailsPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
     const { getFormById, updateForm } = useForms();
     const { user } = useAuth();
     const [activeTab, setActiveTab] = useState('overview');
@@ -79,8 +80,6 @@ export function FormDetailsPage() {
     const [newEmail, setNewEmail] = useState('');
     const [redirectUrl, setRedirectUrl] = useState('');
     const [copiedStates, setCopiedStates] = useState<{ [key: string]: boolean }>({});
-    const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
     // Spam protection state management
     // This tracks the security settings that will be saved to the backend
     // enabled: Master toggle for all spam protection (CAPTCHA, honeypot, rate limiting)
@@ -433,14 +432,52 @@ export function FormDetailsPage() {
 
     // Modal handling functions
     const handleViewSubmission = (submission: Submission) => {
-        setSelectedSubmission(submission);
-        setIsModalOpen(true);
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.set('submission', submission.id);
+        setSearchParams(newSearchParams);
     };
 
     const handleCloseModal = () => {
-        setSelectedSubmission(null);
-        setIsModalOpen(false);
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.delete('submission');
+        setSearchParams(newSearchParams);
     };
+
+    // Get selected submission from URL and submissions data
+    const selectedSubmissionId = searchParams.get('submission');
+    const selectedSubmission = selectedSubmissionId && submissionsData?.submissions
+        ? submissionsData.submissions.find(sub => sub.id === selectedSubmissionId)
+        : null;
+    const isModalOpen = !!selectedSubmission;
+
+    // Auto-switch to submissions tab when viewing a submission
+    React.useEffect(() => {
+        if (selectedSubmissionId && activeTab !== 'submissions') {
+            setActiveTab('submissions');
+        }
+    }, [selectedSubmissionId, activeTab]);
+
+    // Handle keyboard events for modal
+    React.useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape' && isModalOpen) {
+                handleCloseModal();
+            }
+        };
+
+        if (isModalOpen) {
+            document.addEventListener('keydown', handleKeyDown);
+            // Prevent body scroll when modal is open
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+            document.body.style.overflow = 'unset';
+        };
+    }, [isModalOpen]);
 
 
 
@@ -1282,8 +1319,14 @@ form.addEventListener('submit', async (e) => {
 
                 {/* Submission Details Modal */}
                 {isModalOpen && selectedSubmission && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                        <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+                    <div
+                        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+                        onClick={handleCloseModal}
+                    >
+                        <div
+                            className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
+                            onClick={(e) => e.stopPropagation()}
+                        >
                             {/* Modal Header */}
                             <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
                                 <h3 className="text-lg font-medium text-gray-900">Submission Details</h3>
