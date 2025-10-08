@@ -2,11 +2,11 @@ services:
   # MySQL Database
   db:
     image: mysql:8.0
-    container_name: express-react-auth-db
+    container_name: formgrid-db
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: express_react_auth
+      MYSQL_DATABASE: formgrid
       MYSQL_USER: app_user
       MYSQL_PASSWORD: app_password
     ports:
@@ -21,7 +21,7 @@ services:
   # Redis for Queue System
   redis:
     image: redis:7-alpine
-    container_name: express-react-auth-redis
+    container_name: formgrid-redis
     restart: unless-stopped
     ports:
       - "6379:6379"
@@ -35,7 +35,7 @@ services:
   # MinIO - S3-compatible object storage (optional)
   minio:
     image: minio/minio:latest
-    container_name: express-react-auth-minio
+    container_name: formgrid-minio
     restart: unless-stopped
     ports:
       - "9000:9000"  # API
@@ -58,7 +58,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: express-react-auth-backend
+    container_name: formgrid-backend
     restart: unless-stopped
     ports:
       - "4001:4000"
@@ -70,7 +70,7 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=4000
-      - DATABASE_URL=mysql://app_user:app_password@db:3306/express_react_auth
+      - DATABASE_URL=mysql://app_user:app_password@db:3306/formgrid
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_DB=0
@@ -117,7 +117,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: express-react-auth-frontend
+    container_name: formgrid-frontend
     restart: unless-stopped
     ports:
       - "5173:5173"
@@ -135,7 +135,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: express-react-auth-queue-worker
+    container_name: formgrid-queue-worker
     restart: unless-stopped
     volumes:
       - ./backend:/app
@@ -143,7 +143,7 @@ services:
       - uploads_data:/app/uploads
     environment:
       - NODE_ENV=development
-      - DATABASE_URL=mysql://app_user:app_password@db:3306/express_react_auth
+      - DATABASE_URL=mysql://app_user:app_password@db:3306/formgrid
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_DB=0
@@ -167,13 +167,13 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: express-react-auth-file-cleanup
+    container_name: formgrid-file-cleanup
     restart: unless-stopped
     volumes:
       - uploads_data:/app/uploads
     environment:
       - NODE_ENV=development
-      - DATABASE_URL=mysql://app_user:app_password@db:3306/express_react_auth
+      - DATABASE_URL=mysql://app_user:app_password@db:3306/formgrid
       - FILE_CLEANUP_AGE_DAYS=30
       - FILE_CLEANUP_DRY_RUN=false
     env_file:

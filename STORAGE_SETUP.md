@@ -150,7 +150,7 @@ docker-compose logs minio
 
 # Reset MinIO data
 docker-compose down
-docker volume rm node-express-form-api_minio_data
+docker volume rm formgrid_minio_data
 docker-compose up
 ```
 
