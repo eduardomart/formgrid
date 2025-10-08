@@ -1,0 +1,29 @@
+# Docker Compose override for different storage configurations
+# Usage: 
+# - Local storage: docker-compose up
+# - S3 storage: FILE_STORAGE_TYPE=s3 docker-compose up
+# - MinIO storage: FILE_STORAGE_TYPE=minio docker-compose up
+# - GCS storage: FILE_STORAGE_TYPE=gcs docker-compose up
+
+services:
+  backend:
+    environment:
+      # Override storage type based on environment variable
+      - FILE_STORAGE_TYPE=${FILE_STORAGE_TYPE:-local}
+      
+      # S3 Configuration
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - AWS_S3_BUCKET=${AWS_S3_BUCKET:-}
+      
+      # GCS Configuration  
+      - GCS_PROJECT_ID=${GCS_PROJECT_ID:-}
+      - GCS_BUCKET_NAME=${GCS_BUCKET_NAME:-}
+      - GCS_REGION=${GCS_REGION:-us-central1}
+      
+      # MinIO Configuration
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-http://minio:9000}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-minioadmin}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-minioadmin123}
+      - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME:-file-uploads}
