@@ -1,0 +1,47 @@
+{
+  "name": "formgrid",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Form Endpoint API Generator - Create powerful API endpoints for your HTML forms",
+  "scripts": {
+    "dev": "pnpm -r --parallel run dev",
+    "build": "pnpm -r run build",
+    "test": "pnpm -r run test",
+    "lint": "pnpm -r run lint",
+    "clean": "pnpm -r run clean && rm -rf node_modules",
+    "api:dev": "pnpm --filter @formgrid/api run dev",
+    "api:build": "pnpm --filter @formgrid/api run build",
+    "api:test": "pnpm --filter @formgrid/api run test",
+    "dashboard:dev": "pnpm --filter @formgrid/dashboard run dev",
+    "dashboard:build": "pnpm --filter @formgrid/dashboard run build",
+    "docker:up": "docker compose -f docker/docker-compose.yml up --build",
+    "docker:down": "docker compose -f docker/docker-compose.yml down",
+    "docker:clean": "docker compose -f docker/docker-compose.yml down -v && docker system prune -f"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.15.0",
+  "keywords": [
+    "form",
+    "api",
+    "endpoint",
+    "formgrid",
+    "backend",
+    "typescript",
+    "react",
+    "monorepo"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": ""
+  }
+}
+

@@ -41,35 +41,53 @@
 
 ## Project Structure
 
+This is a **monorepo** managed with **pnpm workspaces**:
+
 ```
-├── backend/                    # Node.js + TypeScript API server
-│   ├── src/
-│   │   ├── auth/              # Authentication logic & routes
-│   │   ├── user/              # User management
-│   │   ├── form/              # Form creation and management
-│   │   ├── submission/        # Form submission handling
-│   │   ├── middleware/        # File upload and validation middleware
-│   │   ├── config/            # Storage and application configuration
-│   │   └── scripts/           # Utility scripts for maintenance
-│   ├── prisma/                # Database schema and migrations
-│   └── uploads/               # Local file storage (when using local storage)
-├── frontend/                  # React + TypeScript frontend
-│   ├── src/
-│   │   ├── components/        # Reusable UI components
-│   │   ├── pages/             # Application pages (Dashboard, Form Builder)
-│   │   ├── layouts/           # Layout components
-│   │   ├── context/           # React context providers
-│   │   └── lib/               # Utility libraries
-│   └── public/                # Static assets
-├── docker-compose.yml         # Multi-storage Docker configuration
-├── STORAGE_SETUP.md          # Storage configuration guide
-└── README.md                 # This file
+formgrid/
+├── apps/                          # End-user facing applications
+│   └── dashboard/                 # React + Vite dashboard (@formgrid/dashboard)
+│       ├── src/
+│       │   ├── components/        # Reusable UI components
+│       │   ├── pages/             # Application pages (Dashboard, Form Builder)
+│       │   ├── layouts/           # Layout components
+│       │   ├── context/           # React context providers
+│       │   ├── hooks/             # Custom React hooks
+│       │   └── lib/               # Utility libraries
+│       └── public/                # Static assets
+├── packages/                      # Reusable libraries & backend code
+│   └── api/                       # Node.js + TypeScript API (@formgrid/api)
+│       ├── src/
+│       │   ├── auth/              # Authentication logic & routes
+│       │   ├── user/              # User management
+│       │   ├── form/              # Form creation and management
+│       │   ├── submission/        # Form submission handling
+│       │   ├── services/          # Email, spam protection, analytics
+│       │   ├── middleware/        # Rate limiting, file uploads
+│       │   ├── infrastructure/    # Storage adapters, email providers
+│       │   ├── jobs/              # Queues, cron jobs, async tasks
+│       │   └── scripts/           # Utility scripts for maintenance
+│       ├── prisma/                # Database schema and migrations
+│       ├── tests/                 # Unit & integration tests
+│       └── uploads/               # Local file storage
+├── docker/                        # Docker configurations
+│   ├── docker-compose.yml         # Multi-storage Docker configuration
+│   ├── docker-compose.override.yml
+│   └── README.md
+├── scripts/                       # Monorepo-level dev scripts
+├── Makefile                       # Convenience commands for dev/build/deploy
+├── package.json                   # Root workspace configuration
+├── pnpm-workspace.yaml            # pnpm workspace definition
+├── tsconfig.base.json             # Shared TypeScript config
+├── STORAGE_SETUP.md              # Storage configuration guide
+└── README.md                     # This file
 ```
 
 ## Quick Start
 
 ### Prerequisites
-- Node.js 18+ and npm
+- Node.js 18+ 
+- pnpm 8+ (recommended) - `npm install -g pnpm`
 - Docker and Docker Compose
 - MySQL (or use Docker)
 
@@ -81,43 +99,42 @@
    cd formgrid
    ```
 
-2. **Set up environment variables**
+2. **Install dependencies**
    ```bash
-   # Backend environment
-   cd backend
-   cp .env.example .env
-   # Edit .env with your configuration
+   # Install all workspace dependencies
+   pnpm install
    ```
 
-3. **Install dependencies**
+3. **Set up environment variables**
    ```bash
-   # Backend
-   cd backend
-   npm install
-
-   # Frontend
-   cd ../frontend
-   npm install
+   # Backend environment
+   cd packages/api
+   cp .env.example .env
+   # Edit .env with your configuration
+   cd ../..
    ```
 
 4. **Set up the database**
    ```bash
-   cd backend
+   cd packages/api
    npx prisma migrate dev
    npx prisma generate
+   cd ../..
    ```
 
 5. **Start the application**
    ```bash
    # Using Docker (recommended)
-   docker-compose up
+   make run-local
+   # or: docker compose -f docker/docker-compose.yml up --build
 
-   # Or run locally
-   # Backend
-   cd backend && npm run dev
+   # Or run locally (development)
+   pnpm run dev
+   # This runs both dashboard and api in parallel
 
-   # Frontend (in another terminal)
-   cd frontend && npm run dev
+   # Or run individually
+   pnpm run dashboard:dev  # Frontend only
+   pnpm run api:dev        # Backend only
    ```
 
 6. **Access the application**
@@ -131,22 +148,23 @@ FormGrid supports multiple storage options for file uploads:
 
 ### Local Storage (Default)
 ```bash
-docker-compose up
+make run-local
+# or: docker compose -f docker/docker-compose.yml up
 ```
 
 ### MinIO (S3-Compatible)
 ```bash
-FILE_STORAGE_TYPE=minio docker-compose up
+FILE_STORAGE_TYPE=minio docker compose -f docker/docker-compose.yml up
 ```
 
 ### AWS S3
 ```bash
-FILE_STORAGE_TYPE=s3 AWS_ACCESS_KEY_ID=xxx AWS_SECRET_ACCESS_KEY=xxx docker-compose up
+FILE_STORAGE_TYPE=s3 AWS_ACCESS_KEY_ID=xxx AWS_SECRET_ACCESS_KEY=xxx docker compose -f docker/docker-compose.yml up
 ```
 
 ### Google Cloud Storage
 ```bash
-FILE_STORAGE_TYPE=gcs GCS_PROJECT_ID=xxx docker-compose up
+FILE_STORAGE_TYPE=gcs GCS_PROJECT_ID=xxx docker compose -f docker/docker-compose.yml up
 ```
 
 For detailed storage setup instructions, see [STORAGE_SETUP.md](./STORAGE_SETUP.md).
@@ -268,27 +286,60 @@ AWS_S3_BUCKET=your-bucket-name
 
 ### Available Scripts
 
-**Backend:**
+**Root (Monorepo):**
 ```bash
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run start        # Start production server
-npm run cleanup      # Clean up old files
-npm run setup:minio  # Setup MinIO bucket
+pnpm install             # Install all dependencies
+pnpm run dev             # Start all services (dashboard + api)
+pnpm run build           # Build all workspaces
+pnpm run test            # Run all tests
+pnpm run clean           # Clean all workspaces
+
+# Individual workspace commands
+pnpm run dashboard:dev   # Start dashboard only
+pnpm run dashboard:build # Build dashboard only
+pnpm run api:dev         # Start API only
+pnpm run api:build       # Build API only
+pnpm run api:test        # Test API only
 ```
 
-**Frontend:**
+**Dashboard (apps/dashboard):**
 ```bash
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run preview      # Preview production build
+cd apps/dashboard
+pnpm run dev             # Start development server
+pnpm run build           # Build for production
+pnpm run preview         # Preview production build
+```
+
+**API (packages/api):**
+```bash
+cd packages/api
+pnpm run dev             # Start development server
+pnpm run build           # Build for production
+pnpm run start           # Start production server
+pnpm run worker          # Start queue worker
+pnpm run cleanup         # Clean up old files
+pnpm run setup:minio     # Setup MinIO bucket
 ```
 
 ### Database Management
 ```bash
+cd packages/api
 npx prisma migrate dev    # Create and apply migrations
 npx prisma generate       # Generate Prisma client
 npx prisma studio         # Open Prisma Studio
+```
+
+### Using Make Commands
+```bash
+make install             # Install dependencies
+make dev                 # Start all services locally
+make build               # Build all workspaces
+make run-local           # Start with Docker
+make down-local          # Stop Docker services
+make clean               # Clean Docker volumes
+make test                # Run all tests
+make migrate             # Run database migrations
+make help                # Show all available commands
 ```
 
 ## Deployment
@@ -296,21 +347,31 @@ npx prisma studio         # Open Prisma Studio
 ### Docker Production
 ```bash
 # Build and start all services
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+docker compose -f docker/docker-compose.yml up -d --build
 
 # Setup storage (if needed)
-docker-compose exec backend npm run setup:minio
+docker compose -f docker/docker-compose.yml exec backend pnpm run setup:minio
 
 # Cleanup old files
-docker-compose exec backend npm run cleanup
+docker compose -f docker/docker-compose.yml exec backend pnpm run cleanup
 ```
 
 ### Manual Deployment
-1. Build the frontend: `npm run build`
-2. Build the backend: `npm run build`
-3. Set up your database and environment variables
-4. Start the backend server: `npm start`
-5. Serve the frontend build files
+1. Install dependencies: `pnpm install`
+2. Build all workspaces: `pnpm run build`
+3. Set up your database and environment variables in `packages/api/.env`
+4. Run database migrations: `cd packages/api && npx prisma migrate deploy`
+5. Start the API server: `cd packages/api && pnpm start`
+6. Serve the dashboard build files from `apps/dashboard/dist`
+
+### Production Environment Variables
+Make sure to set these in your production environment:
+- `NODE_ENV=production`
+- `DATABASE_URL` - Your production database URL
+- `JWT_SECRET` - Strong secret for JWT tokens
+- `RESEND_API_KEY` - For email sending
+- `FILE_STORAGE_TYPE` - Choose: local, s3, gcs, or minio
+- Configure storage-specific variables based on your choice
 
 ## Contributing
 

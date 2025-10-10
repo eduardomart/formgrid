@@ -13,7 +13,7 @@ services:
       - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./backend/prisma/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ../packages/api/prisma/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       timeout: 20s
@@ -57,17 +57,17 @@ services:
   # Backend Service
   backend:
     build:
-      context: ./backend
+      context: ../packages/api
       dockerfile: Dockerfile
     container_name: formgrid-backend
     restart: unless-stopped
     ports:
       - "4001:4000"
     volumes:
-      - ./backend:/app
+      - ../packages/api:/app
       - /app/node_modules
       - uploads_data:/app/uploads  # Local file storage
-      - ./uploads:/app/uploads-dev  # Development bind mount (optional)
+      - ../uploads:/app/uploads-dev  # Development bind mount (optional)
     environment:
       - NODE_ENV=development
       - PORT=4000
@@ -103,7 +103,7 @@ services:
       - MINIO_SECRET_KEY=minioadmin123
       - MINIO_BUCKET_NAME=file-uploads
     env_file:
-      - ./backend/.env
+      - ../packages/api/.env
     depends_on:
       db:
         condition: service_healthy
@@ -116,14 +116,14 @@ services:
   # Frontend Service
   frontend:
     build:
-      context: ./frontend
+      context: ../apps/dashboard
       dockerfile: Dockerfile
     container_name: formgrid-frontend
     restart: unless-stopped
     ports:
       - "5173:5173"
     volumes:
-      - ./frontend:/app
+      - ../apps/dashboard:/app
       - /app/node_modules
     environment:
       - VITE_API_BASE_URL=http://localhost:4001
@@ -134,12 +134,12 @@ services:
   # Queue Worker Service
   queue-worker:
     build:
-      context: ./backend
+      context: ../packages/api
       dockerfile: Dockerfile
     container_name: formgrid-queue-worker
     restart: unless-stopped
     volumes:
-      - ./backend:/app
+      - ../packages/api:/app
       - /app/node_modules
       - uploads_data:/app/uploads
     environment:
@@ -155,7 +155,7 @@ services:
       - FILE_STORAGE_TYPE=local
       - UPLOAD_PATH=/app/uploads
     env_file:
-      - ./backend/.env
+      - ../packages/api/.env
     depends_on:
       db:
         condition: service_healthy
@@ -166,7 +166,7 @@ services:
   # File Cleanup Service (optional)
   file-cleanup:
     build:
-      context: ./backend
+      context: ../packages/api
       dockerfile: Dockerfile
     container_name: formgrid-file-cleanup
     restart: unless-stopped
@@ -178,7 +178,7 @@ services:
       - FILE_CLEANUP_AGE_DAYS=30
       - FILE_CLEANUP_DRY_RUN=false
     env_file:
-      - ./backend/.env
+      - ../packages/api/.env
     depends_on:
       db:
         condition: service_healthy

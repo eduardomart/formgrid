@@ -1,13 +1,23 @@
 {
-  "name": "formgrid-frontend",
+  "name": "@formgrid/dashboard",
   "private": true,
   "version": "1.0.0",
+  "description": "FormGrid Dashboard - React dashboard for managing form endpoints",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "clean": "rm -rf dist node_modules",
+    "lint": "echo 'No linter configured'"
   },
+  "keywords": [
+    "formgrid",
+    "dashboard",
+    "react",
+    "forms"
+  ],
+  "license": "MIT",
   "dependencies": {
     "@hookform/resolvers": "^3.3.2",
     "@reduxjs/toolkit": "^2.9.0",

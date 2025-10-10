@@ -1,7 +1,8 @@
 {
-  "name": "formgrid-backend",
+  "name": "@formgrid/api",
   "version": "1.0.0",
   "private": true,
+  "description": "FormGrid API - Backend service for form endpoint generation",
   "main": "dist/server.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
@@ -20,12 +21,17 @@
     "test:spam": "ts-node src/test-spam-protection.ts",
     "cleanup": "ts-node src/scripts/file-cleanup.ts",
     "setup:minio": "ts-node src/scripts/setup-minio.ts",
-    "setup:s3": "ts-node src/scripts/setup-s3.ts"
+    "setup:s3": "ts-node src/scripts/setup-s3.ts",
+    "clean": "rm -rf dist node_modules"
   },
-  "keywords": [],
+  "keywords": [
+    "formgrid",
+    "api",
+    "forms",
+    "backend"
+  ],
   "author": "",
-  "license": "ISC",
-  "description": "",
+  "license": "MIT",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.901.0",
     "@google-cloud/storage": "^7.17.2",
