@@ -1,5 +1,5 @@
 {
-  "name": "@formgrid/cli",
+  "name": "formgrid-cli",
   "version": "1.0.0",
   "description": "CLI tool for managing and running Formgrid locally with Docker — just like Supabase CLI.",
   "type": "module",
@@ -16,9 +16,28 @@
     "formgrid",
     "cli",
     "docker",
-    "forms"
+    "forms",
+    "api",
+    "self-hosted",
+    "form-backend",
+    "monorepo"
   ],
+  "author": "Allen Jones",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/allenarduino/formgrid.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/allenarduino/formgrid/issues"
+  },
+  "homepage": "https://github.com/allenarduino/formgrid#readme",
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
+  ],
   "dependencies": {
     "chalk": "^5.3.0",
     "commander": "^11.0.0",

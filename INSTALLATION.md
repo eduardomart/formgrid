@@ -4,17 +4,19 @@
 
 ### Quick Start (Using npx - No Installation)
 
-The easiest way to use FormGrid is with `npx`:
+The easiest way to use FormGrid is with the CLI:
 
 ```bash
-# Clone the repository
-git clone https://github.com/your-username/formgrid.git
+# Option 1: Install globally (recommended)
+npm install -g formgrid-cli
+formgrid start
+
+# Option 2: Use with npx (no installation)
+npx formgrid-cli start
+
+# Option 3: Clone and use from monorepo
+git clone https://github.com/allenarduino/formgrid.git
 cd formgrid
-
-# Start FormGrid (npx will use the CLI automatically)
-npx @formgrid/cli start
-
-# Or if the package isn't published yet, use from monorepo:
 pnpm install
 pnpm formgrid start
 ```
@@ -24,7 +26,7 @@ pnpm formgrid start
 Install the CLI globally to use it from anywhere:
 
 ```bash
-npm install -g @formgrid/cli
+npm install -g formgrid-cli
 
 # Now use from anywhere
 formgrid start
@@ -32,12 +34,22 @@ formgrid status
 formgrid logs
 ```
 
+### Using with npx (No Installation)
+
+Run commands without installing:
+
+```bash
+npx formgrid-cli start
+npx formgrid-cli status
+npx formgrid-cli logs
+```
+
 ### Local Installation
 
 Install in your project:
 
 ```bash
-npm install --save-dev @formgrid/cli
+npm install --save-dev formgrid-cli
 
 # Use with npx
 npx formgrid start

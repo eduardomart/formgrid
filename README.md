@@ -172,19 +172,33 @@ pnpm formgrid start -d
 
 ## CLI Tool
 
-FormGrid comes with a Supabase-like CLI for managing your local Docker instance:
+FormGrid comes with a Supabase-like CLI for managing your local Docker instance.
+
+### Install the CLI
+
+```bash
+# Install globally from npm
+npm install -g formgrid-cli
+
+# Or use without installing
+npx formgrid-cli start
+```
 
 ### Using the CLI
 
 ```bash
-# Quick start
-pnpm formgrid start -d      # Start in background
-pnpm formgrid status        # Check status
-pnpm formgrid logs          # View logs
-pnpm formgrid stop          # Stop everything
+# Global installation
+formgrid start -d      # Start in background
+formgrid status        # Check status
+formgrid logs          # View logs
+formgrid stop          # Stop everything
+
+# Or from monorepo root
+pnpm formgrid start -d
+pnpm formgrid status
 
 # All available commands
-pnpm formgrid --help
+formgrid --help
 ```
 
 ### Available Commands

@@ -7,13 +7,12 @@ A Supabase-like CLI for managing and running Formgrid locally with Docker.
 ### Global Installation (Recommended)
 
 ```bash
-# From the monorepo root
-pnpm --filter @formgrid/cli run build
-cd packages/cli
-pnpm link --global
+# Install from npm
+npm install -g formgrid-cli
 
-# Or install globally from npm (when published)
-npm install -g @formgrid/cli
+# Now use from anywhere
+formgrid start
+formgrid status
 ```
 
 ### Local Usage (Development)
