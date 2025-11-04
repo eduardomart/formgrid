@@ -89,17 +89,18 @@ export class FormService {
     }
 
     /**
-     * Get all forms with pagination
+     * Get all forms with pagination for a specific user
      * @param page - Page number (1-based)
      * @param limit - Number of items per page
+     * @param userId - ID of the user to get forms for
      * @returns Promise<{ forms: Form[]; total: number; totalPages: number }> - Paginated results
      */
-    async getAll(page: number = 1, limit: number = 10): Promise<{
+    async getAll(page: number = 1, limit: number = 10, userId: string): Promise<{
         forms: Form[];
         total: number;
         totalPages: number;
     }> {
-        return this.formRepo.findAll(page, limit);
+        return this.formRepo.findAll(page, limit, userId);
     }
 
     /**

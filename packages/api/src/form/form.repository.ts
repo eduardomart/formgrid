@@ -98,12 +98,13 @@ export class FormRepository {
     }
 
     /**
-     * Find all forms with pagination
+     * Find all forms with pagination for a specific user
      * @param page - Page number (1-based)
      * @param limit - Number of items per page
+     * @param userId - ID of the user to filter forms by
      * @returns Promise<{ forms: Form[]; total: number; totalPages: number }> - Paginated results
      */
-    async findAll(page: number = 1, limit: number = 10): Promise<{
+    async findAll(page: number = 1, limit: number = 10, userId: string): Promise<{
         forms: Form[];
         total: number;
         totalPages: number;
@@ -112,6 +113,7 @@ export class FormRepository {
 
         const [forms, total] = await Promise.all([
             this.prisma.form.findMany({
+                where: { userId },
                 skip,
                 take: limit,
                 orderBy: { createdAt: 'desc' },
@@ -129,7 +131,9 @@ export class FormRepository {
                     },
                 },
             }),
-            this.prisma.form.count(),
+            this.prisma.form.count({
+                where: { userId },
+            }),
         ]);
 
         return {

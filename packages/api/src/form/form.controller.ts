@@ -21,10 +21,20 @@ export class FormController {
 
     /**
      * GET /api/forms
-     * Get all forms with pagination
+     * Get all forms with pagination for the authenticated user
      */
     async getAllForms(req: Request, res: Response): Promise<void> {
         try {
+            // Get user ID from authenticated request
+            const userId = (req as any).user?.id;
+            if (!userId) {
+                res.status(401).json({
+                    success: false,
+                    message: 'Authentication required',
+                });
+                return;
+            }
+
             // Validate query parameters
             const queryResult = formQuerySchema.safeParse(req.query);
             if (!queryResult.success) {
@@ -40,7 +50,7 @@ export class FormController {
             }
 
             const { page = 1, limit = 10 } = queryResult.data;
-            const result = await this.formService.getAll(page, limit);
+            const result = await this.formService.getAll(page, limit, userId);
 
             res.status(200).json({
                 success: true,
@@ -142,7 +152,7 @@ export class FormController {
 
     /**
      * GET /api/forms/:id
-     * Get a specific form by ID
+     * Get a specific form by ID (only for the owner)
      */
     async getFormById(req: Request, res: Response): Promise<void> {
         try {
@@ -156,7 +166,17 @@ export class FormController {
                 return;
             }
 
-            const form = await this.formService.getById(id);
+            // Get user ID from authenticated request
+            const userId = (req as any).user?.id;
+            if (!userId) {
+                res.status(401).json({
+                    success: false,
+                    message: 'Authentication required',
+                });
+                return;
+            }
+
+            const form = await this.formService.getByIdWithUser(id, userId);
 
             if (!form) {
                 res.status(404).json({
