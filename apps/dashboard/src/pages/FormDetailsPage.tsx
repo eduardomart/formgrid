@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { useForms } from '../hooks/useForms';
@@ -91,8 +91,18 @@ export function FormDetailsPage() {
         rateLimit: 10      // Rate limiting (submissions per minute)
     });
 
+    // Pagination state for submissions
+    const [submissionsPage, setSubmissionsPage] = useState(1);
+    const [submissionsRowsPerPage, setSubmissionsRowsPerPage] = useState(10);
+
     // Fetch submissions data
-    const { data: submissionsData, loading: submissionsLoading, error: submissionsError, refetch: refetchSubmissions } = useSubmissions(id || '', 1, 10);
+    const { data: submissionsData, loading: submissionsLoading, error: submissionsError, refetch: refetchSubmissions } = useSubmissions(id || '', submissionsPage, submissionsRowsPerPage);
+
+    // Clear selection when page changes
+    useEffect(() => {
+        setSelectedSubmissions(new Set());
+        setIsAllSelected(false);
+    }, [submissionsPage, submissionsRowsPerPage]);
 
     // Function to check if form data has changed
     const checkForChanges = () => {
@@ -1108,6 +1118,117 @@ form.addEventListener('submit', async (e) => {
                                     </tbody>
                                 </table>
                             </div>
+
+                            {/* Pagination Controls */}
+                            {submissionsData && submissionsData.pagination.total > 0 && (
+                                <div className="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 sm:px-6">
+                                    <div className="flex items-center space-x-4">
+                                        <div className="flex items-center space-x-2">
+                                            <label htmlFor="rowsPerPage" className="text-sm text-gray-700">
+                                                Rows per page:
+                                            </label>
+                                            <select
+                                                id="rowsPerPage"
+                                                value={submissionsRowsPerPage}
+                                                onChange={(e) => {
+                                                    setSubmissionsRowsPerPage(Number(e.target.value));
+                                                    setSubmissionsPage(1); // Reset to first page when changing rows per page
+                                                }}
+                                                className="block w-20 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm rounded-md"
+                                            >
+                                                <option value={10}>10</option>
+                                                <option value={25}>25</option>
+                                                <option value={50}>50</option>
+                                                <option value={100}>100</option>
+                                            </select>
+                                        </div>
+                                        <div className="text-sm text-gray-700">
+                                            Showing <span className="font-medium">{(submissionsPage - 1) * submissionsRowsPerPage + 1}</span> to{' '}
+                                            <span className="font-medium">
+                                                {Math.min(submissionsPage * submissionsRowsPerPage, submissionsData.pagination.total)}
+                                            </span>{' '}
+                                            of <span className="font-medium">{submissionsData.pagination.total}</span> results
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        {submissionsData.pagination.totalPages > 1 && (
+                                            <>
+                                                <button
+                                                    onClick={() => setSubmissionsPage(1)}
+                                                    disabled={submissionsPage === 1}
+                                                    className={`px-3 py-2 text-sm font-medium rounded-md ${
+                                                        submissionsPage === 1
+                                                            ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
+                                                            : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                                                    }`}
+                                                >
+                                                    First
+                                                </button>
+                                                <button
+                                                    onClick={() => setSubmissionsPage(prev => Math.max(1, prev - 1))}
+                                                    disabled={submissionsPage === 1}
+                                                    className={`px-3 py-2 text-sm font-medium rounded-md ${
+                                                        submissionsPage === 1
+                                                            ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
+                                                            : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                                                    }`}
+                                                >
+                                                    Previous
+                                                </button>
+                                                <div className="flex items-center space-x-1">
+                                                    {Array.from({ length: Math.min(5, submissionsData.pagination.totalPages) }, (_, i) => {
+                                                        let pageNum;
+                                                        if (submissionsData.pagination.totalPages <= 5) {
+                                                            pageNum = i + 1;
+                                                        } else if (submissionsPage <= 3) {
+                                                            pageNum = i + 1;
+                                                        } else if (submissionsPage >= submissionsData.pagination.totalPages - 2) {
+                                                            pageNum = submissionsData.pagination.totalPages - 4 + i;
+                                                        } else {
+                                                            pageNum = submissionsPage - 2 + i;
+                                                        }
+                                                        return (
+                                                            <button
+                                                                key={pageNum}
+                                                                onClick={() => setSubmissionsPage(pageNum)}
+                                                                className={`px-3 py-2 text-sm font-medium rounded-md ${
+                                                                    submissionsPage === pageNum
+                                                                        ? 'bg-gray-900 text-white'
+                                                                        : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                                                                }`}
+                                                            >
+                                                                {pageNum}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                                <button
+                                                    onClick={() => setSubmissionsPage(prev => Math.min(submissionsData.pagination.totalPages, prev + 1))}
+                                                    disabled={submissionsPage === submissionsData.pagination.totalPages}
+                                                    className={`px-3 py-2 text-sm font-medium rounded-md ${
+                                                        submissionsPage === submissionsData.pagination.totalPages
+                                                            ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
+                                                            : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                                                    }`}
+                                                >
+                                                    Next
+                                                </button>
+                                                <button
+                                                    onClick={() => setSubmissionsPage(submissionsData.pagination.totalPages)}
+                                                    disabled={submissionsPage === submissionsData.pagination.totalPages}
+                                                    className={`px-3 py-2 text-sm font-medium rounded-md ${
+                                                        submissionsPage === submissionsData.pagination.totalPages
+                                                            ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
+                                                            : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                                                    }`}
+                                                >
+                                                    Last
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
