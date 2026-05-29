@@ -1,3 +1,18 @@
+FROM node:20-alpine AS base
+
+RUN npm install -g pnpm
+
+WORKDIR /app
+
+# Dependencies Stage
+FROM base AS dependencies
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY packages/api/package.json ./packages/api/
+
+RUN pnpm install --frozen-lockfile --filter @formgrid/api
+
+# Production Builder Stage
 FROM base AS builder
 
 COPY --from=dependencies /app/node_modules ./node_modules
@@ -10,6 +25,7 @@ WORKDIR /app/packages/api
 RUN npx prisma generate
 RUN pnpm run build
 
+# Production Stage
 FROM node:20-alpine AS production
 
 RUN npm install -g pnpm
