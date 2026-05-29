@@ -32,12 +32,11 @@ RUN npm install -g pnpm
 
 WORKDIR /app/packages/api
 
-COPY packages/api/package.json ./
-
-RUN pnpm install --prod --frozen-lockfile
-
+COPY --from=builder /app/node_modules /app/node_modules
+COPY --from=builder /app/packages/api/node_modules ./node_modules
 COPY --from=builder /app/packages/api/dist ./dist
 COPY --from=builder /app/packages/api/prisma ./prisma
+COPY --from=builder /app/packages/api/package.json ./
 
 RUN npx prisma generate
 
